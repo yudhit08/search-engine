@@ -11,8 +11,7 @@ import {
 } from "@chakra-ui/react";
 import Layout from "../Layout/Layout";
 
-const Crawling = () => {
-    // const [url, setUrl] = useState("https://id.wikipedia.org/wiki/");
+const Scraping = () => {
     const [url, setUrl] = useState("https://id.wikipedia.org/wiki/");
     const [result, setResult] = useState("");
     const [isLoading, setIsLoading] = useState(false)
@@ -52,25 +51,6 @@ const Crawling = () => {
         setIsLoading(false)
     };
 
-    // const addKata = async () => {
-    //     const kalimat = crawl.data;
-    //     for (let i = 0; i < kalimat.data[i].length; i++) {
-    //         //let kalimat = data[i].data;
-    //         console.log(kalimat)
-    //         let kalimatToArray = kalimat.data[i].split(" ")
-    //         const kataInDb = await axios.get(
-    //             "http://localhost:5000/kata"
-    //         );
-    //         let kata = kalimatToArray[0]
-    //         JSON.stringify(kataInDb).includes(kata) === false &&
-    //             (await axios.post("http://localhost:5000/kata", {
-    //                 kata,
-    //             }));
-    //         setIsLoading(true);
-    //     }
-    //     setIsLoading(false)
-    // }
-
     const addKalimat = async () => {
         const sentenceArray = result
             .replace(/([.?!])\s*(?=[a-zA-Z()])/g, "$1|")
@@ -78,47 +58,61 @@ const Crawling = () => {
         //console.log(crawl.data)
         for (let i = 0; i < sentenceArray.length; i++) {
             let kalimat = sentenceArray[i];
-            const kalimatInDb = await axios.get(
-                "http://localhost:5000/kalimat"
-            );
-            //console.log(kalimatInDb);
-            JSON.stringify(kalimatInDb).includes(kalimat) === false &&
-                (await axios.post("http://localhost:5000/kalimat", {
+            // const kalimatInDb = await axios.get(
+            //     "http://localhost:5000/kalimat"
+            // );
+            // //console.log(kalimatInDb);
+            // JSON.stringify(kalimatInDb).includes(kalimat) === false &&
+                await axios.post("http://localhost:5000/kalimat", {
                     kalimat,
-                }));
+                });
             setIsLoading(true);
         }
         setIsLoading(false);
     };
 
     const handleClick = async () => {
-        for (let i = 6; i < 26; i++) {
-            let letter = (i + 10).toString(36);
-            const getKata = await axios.get(`http://localhost:5000/kata`);
-            const dataKata = getKata.data;
-            let k = 0;
-            //console.log(dataKata[0].kata[0])
-            for (let j = 0; j < dataKata.length; j++) {
-                let crawl = "";
-                if(dataKata[j].kata[0].toLowerCase() === letter) {
-                    console.log(dataKata[j].kata.toLowerCase())
-                    setUrl(`https://id.wikipedia.org/wiki/${dataKata[j].kata.toLowerCase()}`)
-                    for(let k = 0; k < 5; k++) {
-                        await axios.post(`http://localhost:5000/crawling`, {
-                            url : `https://id.wikipedia.org/wiki/${dataKata[j].kata.toLowerCase()}`,
+        //setUrl(`https://id.wikipedia.org/wiki/${dataKata[j].kata.toLowerCase()}`)
+
+                    
+                        await axios.post(`http://localhost:5000/scraping`, {
+                            url : `${encodeURI(url)}`,
                         });
-                    }
-                    for(let k = 0; k < 5; k++) {
-                        crawl = await axios.get("http://localhost:5000/crawling");
-                    }
-                    setResult(prevResult => prevResult + crawl.data);
-                    k++;
-                    if (k === 15) {
-                        break;
-                    }
-                }
-            }
-        }
+
+                        crawl = await axios.get("http://localhost:5000/scraping");
+                    
+
+                    setResult(crawl.data);
+                    //await addKalimat(crawl.data)
+        // for (let i = 6; i < 26; i++) {
+        //     let letter = (i + 10).toString(36);
+        //     const getKata = await axios.get(`http://localhost:5000/kata`);
+        //     const dataKata = getKata.data;
+        //     let k = 0;
+        //     //console.log(dataKata[0].kata[0])
+        //     for (let j = 0; j < dataKata.length; j++) {
+        //         let crawl = "";
+        //         if(dataKata[j].kata[0].toLowerCase() === letter.toLowerCase()) {
+        //             console.log(dataKata[j].kata.toLowerCase())
+        //             setUrl(`https://id.wikipedia.org/wiki/${dataKata[j].kata.toLowerCase()}`)
+
+        //             do {
+        //                 await axios.post(`http://localhost:5000/scraping`, {
+        //                     url : `https://id.wikipedia.org/wiki/${dataKata[j].kata.toLowerCase()}`,
+        //                 });
+
+        //                 crawl = await axios.get("http://localhost:5000/scraping");
+        //             } while(crawl.data === "")
+
+        //             //setResult(prevResult => prevResult + crawl.data);
+        //             await addKalimat(crawl.data)
+        //             k++;
+        //             if (k === 15) {
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
     };
 
     return (
@@ -197,4 +191,4 @@ const Crawling = () => {
     );
 };
 
-export default Crawling;
+export default Scraping;

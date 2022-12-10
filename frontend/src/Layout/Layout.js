@@ -1,11 +1,11 @@
 import { Box } from "@chakra-ui/react";
-import { ColorModeSwitcher } from "../ColorModeSwitcher";
+import Header from "../components/Header";
 
-const Layout = ({children}) => {
+const Layout = ({children, handleChange, search, value}) => {
     return (
         <Box>
-            <ColorModeSwitcher position='fixed' top='20px' right='20px' zIndex="99" />
-            <Box>{children}</Box>
+            <Header handleChange={handleChange} search={search} value={value}/>
+            <Box marginTop="7rem" minHeight="calc(100vh - 7rem)">{children}</Box>
         </Box>
     );
 };

@@ -1,4 +1,5 @@
 import kalimat from "../models/kalimatModel.js";
+import {Op} from "sequelize"
 
 export const addKalimat = async (req, res) => {
     try {
@@ -12,9 +13,16 @@ export const addKalimat = async (req, res) => {
 
 export const getKalimat = async (req,res) => {
     try {
-        const response = await kalimat.findAll()
-        res.status(201).json(response)
+        //console.log(req.query.kata)
+        const response = await kalimat.findAll({
+            where: { 
+                kalimat: {
+                    [Op.like]: `%${req.query.kata}%`
+                }
+            },
+        });
+        res.status(201).json(response);
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
     }
 }

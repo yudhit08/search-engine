@@ -14,7 +14,7 @@ import Layout from "../Layout/Layout";
 const AddVideo = () => {
     // const [url, setUrl] = useState("https://id.wikipedia.org/wiki/");
     const [url, setUrl] = useState(
-        "https://www.google.com/search?q=al+quran&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1"
+        "https://www.youtube.com/results?search_query="
     );
     const [alt, setAlt] = useState("");
     const [result, setResult] = useState([]);
@@ -24,40 +24,21 @@ const AddVideo = () => {
         setUrl(e.target.value);
     };
 
-    const forFunc = async (res) => {
-        let urlVideo = "";
-        //console.log(res.length)
-        for (let i = 0; i < res.data.length; i++) {
-            if (
-                res.data[i + 1] === "h" &&
-                res.data[i - 1] === "=" &&
-                res.data[i - 2] === "c"
-            ) {
-                for (let j = i + 1; j < res.data.length; j++) {
-                    if (res.data[j] === ">") {
-                        break;
-                    } else {
-                        urlVideo += res.data[j];
-                    }
-                }
-                //console.log(urlVideo);
-                const imageInDb = await axios.get(
-                    "http://localhost:5000/video"
-                );
-                console.log(res.alt);
-                JSON.stringify(imageInDb).includes(urlVideo) === false &&
-                    (await axios.post("http://localhost:5000/video", {
-                        url: urlVideo,
-                        alt: res.alt,
-                    }));
-                //console.log(res.setAlt)
-                urlVideo = "";
-                setIsLoading(true);
-            }
-            setIsLoading(false);
+    const forFunc = async (res, alt) => {
+        //console.log(res.data)
+        let urlVideo = res.split(" ");
+        for (let i = 0; i < urlVideo.length; i++) {
+            // const videoInDb = await axios.get("http://localhost:5000/video")
+            // JSON.stringify(videoInDb).includes(urlVideo[i]) === false &&
+            urlVideo[i] !== "" &&
+                (await axios.post("http://localhost:5000/video", {
+                    url: urlVideo[i],
+                    alt: alt,
+                }));
+            //console.log(res.setAlt)
         }
     };
-
+    
     const insertToDb = () => {
         console.log(result);
         result.map(async (res) => {
@@ -66,7 +47,8 @@ const AddVideo = () => {
     };
 
     const getVid = async () => {
-        for (let i = 0; i < 26; i++) {
+        setResult([])
+        for (let i = 13; i < 14; i++) {
             let letter = (i + 10).toString(36);
             const getKata = await axios.get(`http://localhost:5000/kata`);
             const dataKata = getKata.data;
@@ -74,41 +56,57 @@ const AddVideo = () => {
             //console.log(dataKata[0].kata[0])
             for (let j = 0; j < dataKata.length; j++) {
                 if (dataKata[j].kata[0].toLowerCase() === letter) {
-                    let crawl = "";
-                    for (let l = 0; l < 10; l++) {
-                        await axios.post(`http://localhost:5000/crawling`, {
-                            url: `https://www.google.com/search?q=${dataKata[
-                                j
-                            ].kata.toLowerCase()}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
-                        });
-                    }
+                    const getKalimat = await axios.get('http://localhost:5000/kalimat');
+                    const dataKalimat = getKalimat.data
+                    let n = 0;
+                    for (let l = 0; l < dataKalimat.length; l++) {
+                        let kalimat = dataKalimat[l].kalimat.split(" ")
+                        if(kalimat[0].toLowerCase() === dataKata[j].kata.toLowerCase() && k > 10) {
+                            let crawl = "";
 
-                    for (let l = 0; l < 10; l++) {
-                        crawl = await axios.get(
-                            "http://localhost:5000/crawling"
-                        );
-                    }
-                    //console.log(crawl.data)
+                            do {
+                                await axios.post(
+                                    `http://localhost:5000/yt-scraping`,
+                                    {
+                                        query: `${dataKalimat[
+                                            l
+                                        ].kalimat.toLowerCase()}`,
+                                    }
+                                );
+                                crawl = await axios.get(
+                                    "http://localhost:5000/yt-scraping"
+                                );
+                            } while (crawl.data === "");
+                            
+        
+                            // setResult((prevResult) => [
+                            //     ...prevResult,
+                            //     {
+                            //         data: crawl.data,
+                            //         alt: dataKalimat[l].kalimat.toLowerCase(),
+                            //     },
+                            // ]);
 
-                    setResult((prevResult) => [
-                        ...prevResult,
-                        {
-                            data: crawl.data,
-                            alt: dataKata[j].kata.toLowerCase(),
-                        },
-                    ]);
-                    console.log(dataKata[j].kata.toLowerCase());
+                            await forFunc(crawl.data, dataKalimat[l].kalimat.toLowerCase())
+
+                            console.log("Kata: ",k);
+                            console.log("Kalimat: ",n);
+                            console.log(dataKalimat[l].kalimat.toLowerCase())
+                            n++;
+                            if (n === 10) {
+                                break;
+                            }
+                        }
+                    }
                     k++;
                     if (k === 15) {
                         break;
                     }
-                    console.log(k);
                 }
             }
             //console.log(result)
-            console.log(letter);
+            //console.log(letter);
         }
-        console.log(result.length);
     };
 
     return (
@@ -178,7 +176,7 @@ const AddVideo = () => {
                             minHeight='10px'
                             padding='20px'
                         >
-                            {result.data}
+                            {/* {result[0].data} */}
                         </Box>
                     </Box>
                     <Flex gap='20px'>

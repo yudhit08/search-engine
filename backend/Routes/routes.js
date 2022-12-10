@@ -7,8 +7,9 @@ import {
 } from "../controllers/kataController.js";
 import { addKalimat, getKalimat } from "../controllers/kalimatController.js";
 import { addImage, getImage } from "../controllers/imageController.js";
-import { crawling, getDataCrawling } from "../controllers/crawling.js";
+import { scraping, getDataCrawling } from "../controllers/scraping.js";
 import { addVideo, getVideo } from "../controllers/videoController.js";
+import { ytScraping, getDataYtCrawling } from "../controllers/ytScraping.js";
 
 const router = express.Router();
 
@@ -26,7 +27,10 @@ router.post("/image", addImage);
 router.get("/video", getVideo);
 router.post("/video", addVideo);
 
-router.get("/crawling", getDataCrawling);
-router.post("/crawling", crawling);
+router.get("/scraping", getDataCrawling);
+router.post("/scraping", scraping);
+
+router.get("/yt-scraping", getDataYtCrawling);
+router.post("/yt-scraping", ytScraping);
 
 export default router;

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import kata from "../models/kataModel.js";
 
 export const addKata = async (req, res) => {

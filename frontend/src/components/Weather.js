@@ -19,7 +19,7 @@ const Weather = () => {
     }, []);
 
     return (
-        <Box position='fixed' zIndex='10' top='30px' left='30px'>
+        <Box position='fixed' zIndex='99' top='30px' left='30px'>
             {weather.map((data) => {
                 return (
                     <Link color='white' href={data.Link} target="_blank">

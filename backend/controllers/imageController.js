@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import image from "../models/imageModel.js";
 
 export const addImage = async (req, res) => {
@@ -12,7 +13,13 @@ export const addImage = async (req, res) => {
 
 export const getImage = async (req,res) => {
     try {
-        const response = await image.findAll()
+        const response = await image.findAll({
+            where: {
+                alt: {
+                    [Op.like]: `%${req.query.alt}%`
+                }
+            }
+        })
         res.status(201).json(response)
     } catch (error) {
         console.log(error.message)

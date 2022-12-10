@@ -24,40 +24,33 @@ const AddImage = () => {
         setUrl(e.target.value);
     };
 
-    const forFunc = async (res) => {
+    const forFunc = async (res, alt) => {
         let urlPics = "";
         //console.log(res.length)
-        for (let i = 0; i < res.data.length; i++) {
+        for (let i = 0; i < res.length; i++) {
             if (
-                res.data[i + 1] === "h" &&
-                res.data[i - 1] === "=" &&
-                res.data[i - 2] === "c"
+                res[i + 1] === "h" &&
+                res[i - 1] === "=" &&
+                res[i - 2] === "c"
             ) {
-                for (let j = i + 1; j < res.data.length; j++) {
-                    if (res.data[j] === ">") {
+                for (let j = i + 1; j < res.length; j++) {
+                    if (res[j] === ">") {
                         break;
                     } else {
-                        urlPics += res.data[j];
+                        urlPics += res[j];
                     }
                 }
                 //console.log(urlPics);
-                const imageInDb = await axios.get(
-                    "http://localhost:5000/image"
-                );
-                console.log(res.alt);
-                JSON.stringify(imageInDb).includes(urlPics) === false &&
-                    (await axios.post("http://localhost:5000/image", {
+                await axios.post("http://localhost:5000/image", {
                         url: urlPics,
-                        alt: res.alt,
-                    }));
+                        alt: alt,
+                });
                 //console.log(res.setAlt)
                 urlPics = "";
-                setIsLoading(true);
             }
-            setIsLoading(false);
         }
     };
-
+    
     const insertToDb = () => {
         console.log(result);
         result.map(async (res) => {
@@ -66,7 +59,8 @@ const AddImage = () => {
     };
 
     const getImg = async () => {
-        for (let i = 0; i < 26; i++) {
+        setResult([])
+        for (let i = 13; i < 14; i++) {
             let letter = (i + 10).toString(36);
             const getKata = await axios.get(`http://localhost:5000/kata`);
             const dataKata = getKata.data;
@@ -74,41 +68,67 @@ const AddImage = () => {
             //console.log(dataKata[0].kata[0])
             for (let j = 0; j < dataKata.length; j++) {
                 if (dataKata[j].kata[0].toLowerCase() === letter) {
-                    let crawl = "";
-                    for (let l = 0; l < 10; l++) {
-                        await axios.post(`http://localhost:5000/crawling`, {
-                            url: `https://www.google.com/search?q=${dataKata[
-                                j
-                            ].kata.toLowerCase()}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
-                        });
-                    }
+                    const getKalimat = await axios.get(
+                        "http://localhost:5000/kalimat"
+                    );
+                    const dataKalimat = getKalimat.data;
+                    let n = 0;
+                    for (let l = 0; l < dataKalimat.length; l++) {
+                        let kalimat = dataKalimat[l].kalimat.split(" ");
+                        if (kalimat[0].toLowerCase() === dataKata[j].kata.toLowerCase()) {
+                            let crawl= "";
 
-                    for (let l = 0; l < 10; l++) {
-                        crawl = await axios.get(
-                            "http://localhost:5000/crawling"
-                        );
-                    }
-                    //console.log(crawl.data)
+                            do {
+                                //console.log(crawl.data)
+                                await axios.post(
+                                    `http://localhost:5000/scraping`,
+                                    {
+                                        url: `https://www.google.com/search?q=${encodeURI(dataKalimat[
+                                            l
+                                        ].kalimat.toLowerCase())}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
+                                    }
+                                );
+                                crawl = await axios.get(
+                                    "http://localhost:5000/scraping"
+                                );
+                            } while (crawl.data === "" || crawl.data === undefined);
+                            // await axios.post(
+                            //     `http://localhost:5000/scraping`,
+                            //     {
+                            //         url: `https://www.google.com/search?q=${encodeURI(dataKalimat[
+                            //             l
+                            //         ].kalimat.toLowerCase())}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
+                            //     }
+                            // );
+                            // crawl = await axios.get(
+                            //     "http://localhost:5000/scraping"
+                            // );
+                            // setResult((prevResult) => [
+                            //     ...prevResult,
+                            //     {
+                            //         data: crawl.data,
+                            //         alt: dataKalimat[l].kalimat.toLowerCase(),
+                            //     },
+                            // ]);
 
-                    setResult((prevResult) => [
-                        ...prevResult,
-                        {
-                            data: crawl.data,
-                            alt: dataKata[j].kata.toLowerCase(),
-                        },
-                    ]);
-                    console.log(dataKata[j].kata.toLowerCase());
+                            await forFunc(crawl.data, dataKalimat[l].kalimat.toLowerCase())
+
+                            console.log("Kata: ",k);
+                            console.log("Kalimat: ",n);
+                            console.log(dataKalimat[l].kalimat.toLowerCase())
+                            n++;
+                            if (n === 10) {
+                                break;
+                            }
+                        }
+                    }
                     k++;
                     if (k === 15) {
                         break;
                     }
-                    console.log(k);
                 }
             }
-            //console.log(result)
-            console.log(letter);
         }
-        console.log(result.length);
     };
 
     return (

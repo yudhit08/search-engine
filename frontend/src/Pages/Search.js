@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import YouTube from 'react-youtube'
 import {
     Box,
     Text,
     Flex,
-    Button,
-    InputGroup,
-    InputLeftAddon,
-    Input,
     Image,
+    Tabs,
+    TabList,
+    TabPanels,
+    Tab,
+    TabPanel,
 } from "@chakra-ui/react";
+import { Select } from "chakra-react-select";
 import Layout from "../Layout/Layout";
 
 const Search = () => {
@@ -18,20 +19,22 @@ const Search = () => {
     const [words, setWords] = useState([]);
     const [sentence, setSentence] = useState([]);
     const [informasi, setInformasi] = useState([]);
-    const [images, setImages] = useState([])
+    const [images, setImages] = useState([]);
+    const [videos, setVideos] = useState([]);
     const [selectedWord, setSelectedWord] = useState("");
     const [selectedSentence, setSelectedSentence] = useState("");
 
     const handleChange = (e) => {
-        setChar(e.target.value.toUpperCase());
+        setChar(e);
     };
 
     const handleClick = async () => {
         setWords("");
         setSelectedWord("");
-        setSelectedSentence("")
+        setSelectedSentence("");
         setSentence([]);
         setInformasi([]);
+        setVideos([]);
         const kata = await axios.get(`http://localhost:5000/kata`);
         getWord(kata.data);
     };
@@ -49,7 +52,13 @@ const Search = () => {
         for (let i = 0; i < data.length; i++) {
             let kata = data[i].kata.toUpperCase();
             if (kata[0] === char) {
-                setWords((prevWord) => [...prevWord, kata]);
+                setWords((prevWord) => [
+                    ...prevWord,
+                    {
+                        label: kata.trim(),
+                        value: kata.trim(),
+                    },
+                ]);
                 j++;
                 if (j === 15) {
                     break;
@@ -60,219 +69,243 @@ const Search = () => {
 
     const getSentence = async () => {
         setSentence([]);
-        setInformasi([])
-        setImages([])
-        const kalimat = await axios.get(`http://localhost:5000/kalimat`);
+        setInformasi([]);
+        setImages([]);
+        setVideos([]);
+        const kalimat = await axios.get(`http://localhost:5000/kalimat`, {
+            params: {
+                kata: selectedWord
+            }
+        });
         const data = kalimat.data;
         let j = 0;
         for (let i = 0; i < data.length; i++) {
             let kalimat = data[i].kalimat.toUpperCase();
             let kalimatToArray = data[i].kalimat.split(" ");
             if (kalimatToArray[0].toUpperCase() === selectedWord) {
-                setSentence((prevSentence) => [...prevSentence, kalimat]);
+                setSentence((prevSentence) => [
+                    ...prevSentence,
+                    {
+                        label: kalimat.trim(),
+                        value: kalimat.trim(),
+                    },
+                ]);
                 j++;
                 if (j === 10) {
                     break;
                 }
             }
-            // if (kalimat.includes(selectedWord) && selectedWord !== "") {
-            //     setSentence((prevSentence) => [...prevSentence, kalimat]);
-            //     j++;
-            //     if (j === 10) {
-            //         break;
-            //     }
-            // }
         }
     };
 
     const getInformasi = async () => {
         setInformasi([]);
-        setImages([])
-        const informasi = await axios.get(`http://localhost:5000/kalimat`);
+        setImages([]);
+        setVideos([]);
+        const informasi = await axios.get(`http://localhost:5000/kalimat`, {
+            params: {
+                kata: selectedWord
+            }
+        });
         const dataInformasi = informasi.data;
-        let j = 0;
         for (let i = dataInformasi.length - 1; i > 0; i--) {
             const k = Math.floor(Math.random() * (i + 1));
-            [dataInformasi[i], dataInformasi[k]] = [dataInformasi[k], dataInformasi[i]];
+            [dataInformasi[i], dataInformasi[k]] = [
+                dataInformasi[k],
+                dataInformasi[i],
+            ];
         }
+        let k = 0;
         for (let i = 0; i < dataInformasi.length; i++) {
-            let kalimat = dataInformasi[i].kalimat.toUpperCase();
-            if (kalimat.includes(selectedWord) && selectedWord !== "") {
-                setInformasi((prevInformasi) => [...prevInformasi, kalimat]);
-                j++;
-                if (j === 5) {
+            let kalimat = dataInformasi[i].kalimat.split(" ");
+            for (let j = 0; j < kalimat.length; j++) {
+                if ((kalimat[j].toUpperCase() === selectedWord) && selectedWord !== "") {
+                    setInformasi((prevInformasi) => [...prevInformasi, dataInformasi[i].kalimat.toUpperCase()]);
+                    k++;
                     break;
                 }
             }
-        }     
+            if (k === 5) {
+                break;
+            }
+        }
 
-        const image = await axios.get('http://localhost:5000/image') 
-        const dataImage = image.data
-        console.log(dataImage)
-        let k = 0
+        const image = await axios.get("http://localhost:5000/image", {
+            params: {
+                alt: selectedSentence
+            }
+        });
+        const dataImage = image.data;
+        //console.log(dataImage);
+        // let k = 0;
 
         for (let i = dataImage.length - 1; i > 0; i--) {
             const k = Math.floor(Math.random() * (i + 1));
             [dataImage[i], dataImage[k]] = [dataImage[k], dataImage[i]];
         }
         for (let i = 0; i < dataImage.length; i++) {
-            if(dataImage[i].alt.toUpperCase() === selectedWord) {
-                setImages(prevImage => [...prevImage, dataImage[i]])
-                    if (k === 5) {
-                        break;
-                    }
-                k++
+            if (dataImage[i].alt.toUpperCase() === selectedSentence) {
+                setImages((prevImage) => [...prevImage, dataImage[i]]);
             }
-        }    
+        }
+
+        const video = await axios.get("http://localhost:5000/video", {
+            params: {
+                alt: selectedSentence
+            }
+        });
+        const dataVideo = video.data;
+        //console.log(dataVideo)
+
+        let l = 0;
+        k = 0;
+        for (let i = 0; i < dataVideo.length; i++) {
+            if (
+                dataVideo[i].alt.toLowerCase() ===
+                selectedSentence.toLowerCase()
+            ) {
+                k++;
+                if (k < 5) continue
+                setVideos((prevVideos) => [...prevVideos, dataVideo[i]]);
+                if (l === 5) {
+                    break;
+                }
+                l++;
+            }
+        }
+        // console.log(videos)
     };
 
     return (
-        <Layout>
-            <Box padding='20px'>
-                <Flex
-                    flexDirection='column'
-                    alignItems='center'
-                    justifyContent='center'
-                >
-                    <Box width='30rem' marginTop='10vh'>
-                        <Flex gap='20px'>
-                            <InputGroup>
-                                <InputLeftAddon children='Karakter' />
-                                <Input
-                                    type='search'
-                                    onChange={handleChange}
-                                    value={char}
-                                    maxLength={1}
-                                    placeholder='Masukkan karakter'
-                                />
-                            </InputGroup>
-                            <Button
-                                colorScheme='blue'
-                                padding='10px 30px'
-                                onClick={handleClick}
+        <Layout handleChange={handleChange} search={handleClick} value={char}>
+            <Box
+                padding='20px'
+                overflow='hidden'
+                maxWidth='100vw'
+                minHeight='calc(100vh - 7rem)'
+            >
+                <Flex gap='20px' justify='space-between'>
+                    <Box>
+                        <Box width='50vw' borderRadius='10px' marginTop='20px'>
+                            <Text>Kata</Text>
+                            <Select
+                                border='1px solid #00000020'
+                                borderRadius='10px'
+                                placeholder='Pilih Kata'
+                                options={words}
+                                size='xl'
+                                onChange={(e) => setSelectedWord(e.value)}
+                            />
+                            <Text
+                                fontSize='1rem'
+                                opacity='.5'
+                                fontStyle='italic'
                             >
-                                Search
-                            </Button>
-                        </Flex>
+                                Jumlah: {words.length} kata
+                            </Text>
+                        </Box>
+                        <Box width='50vw' borderRadius='10px' marginTop='20px'>
+                            <Text>Kalimat</Text>
+                            <Select
+                                placeholder='Pilih Kalimat'
+                                border='1px solid #00000020'
+                                borderRadius='10px'
+                                options={sentence}
+                                size='xl'
+                                onChange={(e) => setSelectedSentence(e.value)}
+                            />
+                            <Text
+                                fontSize='1rem'
+                                opacity='.5'
+                                fontStyle='italic'
+                            >
+                                Jumlah: {sentence.length} kalimat
+                            </Text>
+                        </Box>
+                        <Box width='50vw' borderRadius='10px' marginTop='20px'>
+                            <Text>Informasi</Text>
+                            <Flex
+                                flexWrap='wrap'
+                                gap='10px'
+                                padding='20px'
+                                border='1px solid #00000020'
+                                borderRadius='10px'
+                                align='left'
+                                justify='left'
+                                //flexDirection="column"
+                            >
+                                {selectedSentence !== "" &&
+                                    informasi.map((info) => {
+                                        return (
+                                            <Box key={info} textAlign='left'>
+                                                {info}
+                                            </Box>
+                                        );
+                                    })}
+                            </Flex>
+                            <Text
+                                fontSize='1rem'
+                                opacity='.5'
+                                fontStyle='italic'
+                            >
+                                Jumlah: {informasi.length} informasi
+                            </Text>
+                        </Box>
                     </Box>
-                    <Box
-                        width='40rem'
-                        marginTop='3rem'
-                        border='1px solid #00000020'
-                        padding='20px'
-                        borderRadius='10px'
-                    >
-                        <Text fontSize='1.2rem'>Kata</Text>
-                        <Flex
-                            flexWrap='wrap'
-                            gap='10px'
-                            padding='20px'
-                            border='1px solid #00000020'
-                            borderRadius='10px'
-                        >
-                            {words &&
-                                words.map((word) => {
-                                    return (
-                                        <Box
-                                            key={word}
-                                            cursor='pointer'
-                                            onClick={() =>
-                                                setSelectedWord(word)
-                                            }
-                                            sx={{
-                                                "&:hover": {
-                                                    color: "blue.300",
-                                                },
-                                            }}
-                                        >
-                                            {word}
-                                        </Box>
-                                    );
-                                })}
-                        </Flex>
-                        <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
-                            Jumlah: {words.length} kata
-                        </Text>
-                    </Box>
-                    <Box
-                        width='40rem'
-                        marginTop='3rem'
-                        border='1px solid #00000020'
-                        padding='20px'
-                        borderRadius='10px'
-                    >
-                        <Text fontSize='1.2rem'>Kalimat</Text>
-                        <Flex
-                            flexWrap='wrap'
-                            gap='10px'
-                            padding='20px'
-                            border='1px solid #00000020'
-                            borderRadius='10px'
-                        >
-                            {sentence.map((kalimat) => {
-                                return (
-                                    <Box
-                                        key={kalimat}
-                                        cursor='pointer'
-                                        sx={{
-                                            "&:hover": {
-                                                color: "blue.300",
-                                            },
-                                        }}
-                                        onClick={() =>
-                                            setSelectedSentence(kalimat)
-                                        }
+
+                    <Box width='45%' padding='10px'>
+                        <Tabs variant='enclosed'>
+                            <TabList>
+                                <Tab>Images</Tab>
+                                <Tab>Videos</Tab>
+                            </TabList>
+                            <TabPanels>
+                                <TabPanel>
+                                    <Flex
+                                        flexWrap='wrap'
+                                        gap='10px'
+                                        marginBottom='20px'
+                                        padding='10px'
                                     >
-                                        {kalimat}
-                                    </Box>
-                                );
-                            })}
-                        </Flex>
-                        <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
-                            Jumlah: {sentence.length} kalimat
-                        </Text>
-                    </Box>
-                    <Box
-                        width='40rem'
-                        marginTop='3rem'
-                        border='1px solid #00000020'
-                        padding='20px'
-                        borderRadius='10px'
-                    >
-                        <Text fontSize='1.2rem'>Informasi</Text>
-                        <Flex
-                            flexWrap='wrap'
-                            gap='10px'
-                            padding='20px'
-                            border='1px solid #00000020'
-                            borderRadius='10px'
-                            align="left"
-                            justify="center"
-                            //flexDirection="column"
-                        >
-                            {/* <YouTube videoId="qPj50i3gkAo"/> */}
-                            {selectedSentence !== "" && images.map((image) => {
-                                return (
-                                    <Image
-                                        key={image.id}
-                                        src={image.url}
-                                        width="150px"
-                                    />
-                                );
-                            })}
-                            {selectedSentence !== "" && informasi.map((info) => {
-                                return (
-                                    <Box
-                                        key={info}
+                                        {selectedSentence !== "" &&
+                                            images.map((image) => {
+                                                return (
+                                                    <Image
+                                                        key={image.id}
+                                                        src={image.url}
+                                                        width='150px'
+                                                    />
+                                                );
+                                            })}
+                                    </Flex>
+                                </TabPanel>
+                                <TabPanel>
+                                    <Flex
+                                        flexDirection='column'
+                                        gap='10px'
+                                        padding='10px'
                                     >
-                                        {info}
-                                    </Box>
-                                );
-                            })}
-                        </Flex>
-                        <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
-                            Jumlah: {informasi.length} informasi
-                        </Text>
+                                        {selectedSentence !== "" &&
+                                            videos.map((video, i) => {
+                                                //console.log(video.url)
+                                                return (
+                                                    <Box key={i}>
+                                                        <iframe
+                                                            width='100%'
+                                                            height='300'
+                                                            src={`https://www.youtube.com/embed/${video.url}`}
+                                                            frameBorder='0'
+                                                            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                                                            allowFullScreen
+                                                            title='informasi video'
+                                                        />
+                                                    </Box>
+                                                );
+                                            })}
+                                    </Flex>
+                                </TabPanel>
+                            </TabPanels>
+                        </Tabs>
                     </Box>
                 </Flex>
             </Box>

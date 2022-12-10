@@ -8,32 +8,36 @@ import {
     InputGroup,
     InputLeftAddon,
     Input,
+    InputLeftElement,
+    Textarea,
 } from "@chakra-ui/react";
-import { AiFillEdit, AiFillDelete } from "react-icons/ai";
+import { AiFillEdit, AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
 import Swal from "sweetalert2";
 import Layout from "../Layout/Layout";
 
 const AddData = () => {
     const [char, setChar] = useState("");
-    const [words, setWords] = useState([
-        {
-            kata: "",
-            id: 0,
-        },
-    ]);
+    const [words, setWords] = useState([]);
+    const [newKal, setNewKal] = useState("")
     const [selectedWord, setSelectedWord] = useState("");
     const [sentence, setSentence] = useState([]);
 
     const handleChange = (e) => {
-        setChar(e.target.value.toUpperCase());
+        setChar(e);
     };
 
-    const getWord = async () => {
+    const handleClick = async () => {
+        setWords("");
+        setSelectedWord("");
+        setSentence([]);
+        const kata = await axios.get(`http://localhost:5000/kata`);
+        getWord(kata.data);
+    };
+
+    const getWord = async (data) => {
         setWords("");
         setSentence([]);
         setSelectedWord("");
-        const kata = await axios.get(`http://localhost:5000/kata`);
-        const data = kata.data;
         let j = 0;
         for (let i = 0; i < data.length; i++) {
             //console.log(data[i])
@@ -143,152 +147,147 @@ const AddData = () => {
         });
     };
 
+    const addKalimat = async () => {
+        try {
+            await axios.post(
+                `http://localhost:5000/kalimat`, {
+                    kalimat: newKal
+                }
+            );
+            Swal.fire({
+                title: `Kalimat berhasil ditambah`,
+            })
+        } catch (error) {
+            Swal.showValidationMessage(`Request failed: ${error}`);
+        }
+    }
+
     return (
-            <Box padding='20px'>
-                <Flex
-                    flexDirection='column'
-                    alignItems='center'
-                    justifyContent='center'
-                >
-                    <Box width='30rem' marginTop='10vh'>
-                        <Flex gap='20px'>
-                            <InputGroup>
-                                <InputLeftAddon children='Karakter' />
-                                <Input
-                                    type='search'
-                                    onChange={handleChange}
-                                    value={char}
-                                    maxLength={1}
-                                    placeholder='Masukkan karakter'
-                                />
-                            </InputGroup>
-                            <Button
-                                colorScheme='blue'
-                                padding='10px 30px'
-                                onClick={getWord}
-                            >
-                                Search
-                            </Button>
-                        </Flex>
-                    </Box>
-                    <Box
-                        width='40rem'
-                        marginTop='3rem'
-                        border='1px solid #fffffff20'
+        <Layout handleChange={handleChange} search={handleClick} value={char}>
+            <Flex
+                //flexDirection='column'
+                //alignItems='center'
+                justifyContent='center'
+            >
+                <Box width='40rem' marginTop='3rem' borderRadius='10px'>
+                    <Text fontSize='1.2rem'>Kata</Text>
+                    <Flex
+                        // flexWrap='wrap'
+                        gap='10px'
+                        flexDirection='column'
                         padding='20px'
+                        border='1px solid #ffffff20'
                         borderRadius='10px'
                     >
-                        <Text fontSize='1.2rem'>Kata</Text>
-                        <Flex
-                            // flexWrap='wrap'
-                            gap='10px'
-                            flexDirection='column'
-                            padding='20px'
-                            border='1px solid #ffffff20'
-                            borderRadius='10px'
-                        >
-                            {words.length > 0 &&
-                                words.map((word) => {
-                                    return (
-                                        <Flex
-                                            justifyContent='space-between'
-                                            border='1px solid #ffffff30'
-                                            padding='10px'
-                                            alignItems='center'
-                                            borderRadius='10px'
+                        {words.length > 0 &&
+                            words.map((word) => {
+                                return (
+                                    <Flex
+                                        justifyContent='space-between'
+                                        border='1px solid #ffffff30'
+                                        padding='10px'
+                                        alignItems='center'
+                                        borderRadius='10px'
+                                    >
+                                        <Box
+                                            key={word.id}
+                                            cursor='pointer'
+                                            onClick={() =>
+                                                setSelectedWord(word.kata)
+                                            }
+                                            sx={{
+                                                "&:hover": {
+                                                    color: "blue.300",
+                                                },
+                                            }}
                                         >
+                                            {word.kata}
+                                        </Box>
+                                        <Flex gap='20px'>
                                             <Box
-                                                key={word.id}
                                                 cursor='pointer'
-                                                onClick={() =>
-                                                    setSelectedWord(word.kata)
-                                                }
                                                 sx={{
                                                     "&:hover": {
-                                                        color: "blue.300",
+                                                        color: "blue.600",
                                                     },
                                                 }}
+                                                onClick={() =>
+                                                    updateKata(
+                                                        word.id,
+                                                        word.kata
+                                                    )
+                                                }
+                                                color='blue.400'
+                                                fontSize='20px'
                                             >
-                                                {word.kata}
+                                                <AiFillEdit />
                                             </Box>
-                                            <Flex gap='20px'>
-                                                <Box
-                                                    cursor='pointer'
-                                                    sx={{
-                                                        "&:hover": {
-                                                            color: "blue.600",
-                                                        },
-                                                    }}
-                                                    onClick={() => updateKata(word.id, word.kata)}
-                                                    color="blue.400"
-                                                    fontSize="20px"
-                                                >
-                                                    <AiFillEdit />
-                                                </Box>
-                                                <Box
-                                                    cursor='pointer'
-                                                    sx={{
-                                                        "&:hover": {
-                                                            color: "red.600",
-                                                        },
-                                                    }}
-                                                    onClick={() =>
-                                                        deleteKata(
-                                                            word.id,
-                                                            word.kata
-                                                        )
-                                                    }
-                                                    color="red.400"
-                                                    fontSize="20px"
-                                                >
-                                                    <AiFillDelete />
-                                                </Box>
-                                            </Flex>
+                                            <Box
+                                                cursor='pointer'
+                                                sx={{
+                                                    "&:hover": {
+                                                        color: "red.600",
+                                                    },
+                                                }}
+                                                onClick={() =>
+                                                    deleteKata(
+                                                        word.id,
+                                                        word.kata
+                                                    )
+                                                }
+                                                color='red.400'
+                                                fontSize='20px'
+                                            >
+                                                <AiFillDelete />
+                                            </Box>
                                         </Flex>
-                                    );
-                                })}
-                        </Flex>
-                        <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
-                            Jumlah: {words.length} kata
-                        </Text>
-                    </Box>
-                    <Box
-                        width='40rem'
-                        marginTop='3rem'
-                        border='1px solid #00000020'
-                        padding='20px'
-                        borderRadius='10px'
-                    >
-                        <Text fontSize='1.2rem'>Kalimat</Text>
-                        <Flex
-                            flexWrap='wrap'
-                            gap='10px'
-                            padding='20px'
-                            border='1px solid #00000020'
-                            borderRadius='10px'
-                        >
-                            {sentence.map((kalimat) => {
-                                return (
-                                    <Box
-                                        key={kalimat}
-                                        cursor='pointer'
-                                        sx={{
-                                            "&:hover": {
-                                                color: "blue.300",
-                                            },
-                                        }}
-                                    >
-                                        {kalimat}
-                                    </Box>
+                                    </Flex>
                                 );
                             })}
-                        </Flex>
-                        <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
-                            Jumlah: {sentence.length} kalimat
-                        </Text>
+                    </Flex>
+                    <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
+                        Jumlah: {words.length} kata
+                    </Text>
+                </Box>
+                <Box width='40rem' marginTop='3rem' borderRadius='10px'>
+                    <Box marginBottom='20px'>
+                        <Text>Tambah Kalimat</Text>
+                        <Textarea
+                            onChange={(e) => setNewKal(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && addKalimat()}
+                            rows='10'
+                        />
                     </Box>
-                </Flex>
-            </Box>
+                    <Text fontSize='1.2rem'>Kalimat</Text>
+                    <Text fontSize='1rem' opacity='.5' fontStyle='italic'>
+                        Jumlah: {sentence.length} kalimat
+                    </Text>
+                    <Flex
+                        flexWrap='wrap'
+                        gap='10px'
+                        padding='20px'
+                        border='1px solid #00000020'
+                        borderRadius='10px'
+                    >
+                        {sentence.map((kalimat) => {
+                            return (
+                                <Box
+                                    key={kalimat}
+                                    cursor='pointer'
+                                    sx={{
+                                        "&:hover": {
+                                            color: "blue.300",
+                                        },
+                                    }}
+                                >
+                                    {kalimat}
+                                </Box>
+                            );
+                        })}
+                    </Flex>
+                </Box>
+            </Flex>
+        </Layout>
     );
 };
 

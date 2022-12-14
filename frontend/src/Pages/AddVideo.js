@@ -12,7 +12,6 @@ import {
 import Layout from "../Layout/Layout";
 
 const AddVideo = () => {
-    // const [url, setUrl] = useState("https://id.wikipedia.org/wiki/");
     const [url, setUrl] = useState(
         "https://www.youtube.com/results?search_query="
     );

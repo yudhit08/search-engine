@@ -69,7 +69,11 @@ const AddImage = () => {
             for (let j = 0; j < dataKata.length; j++) {
                 if (dataKata[j].kata[0].toLowerCase() === letter) {
                     const getKalimat = await axios.get(
-                        "http://localhost:5000/kalimat"
+                        "http://localhost:5000/kalimat", {
+                            params: {
+                                kata: dataKata[j].kata
+                            }
+                        }
                     );
                     const dataKalimat = getKalimat.data;
                     let n = 0;
@@ -88,21 +92,32 @@ const AddImage = () => {
                                         ].kalimat.toLowerCase())}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
                                     }
                                 );
-                                crawl = await axios.get(
-                                    "http://localhost:5000/scraping"
-                                );
+                                crawl = await axios.get("http://localhost:5000/scraping")
                             } while (crawl.data === "" || crawl.data === undefined);
-                            // await axios.post(
-                            //     `http://localhost:5000/scraping`,
-                            //     {
-                            //         url: `https://www.google.com/search?q=${encodeURI(dataKalimat[
-                            //             l
-                            //         ].kalimat.toLowerCase())}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
-                            //     }
-                            // );
-                            // crawl = await axios.get(
-                            //     "http://localhost:5000/scraping"
-                            // );
+                            do {
+                                //console.log(crawl.data)
+                                await axios.post(
+                                    `http://localhost:5000/scraping`,
+                                    {
+                                        url: `https://www.google.com/search?q=${encodeURI(dataKalimat[
+                                            l
+                                        ].kalimat.toLowerCase())}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
+                                    }
+                                );
+                                crawl = await axios.get("http://localhost:5000/scraping")
+                            } while (crawl.data === "" || crawl.data === undefined);
+                            do {
+                                //console.log(crawl.data)
+                                await axios.post(
+                                    `http://localhost:5000/scraping`,
+                                    {
+                                        url: `https://www.google.com/search?q=${encodeURI(dataKalimat[
+                                            l
+                                        ].kalimat.toLowerCase())}&source=lnms&tbm=isch&sa=X&ved=2ahUKEwjPj6DR87v7AhXhWqQEHVNrBGEQ_AUoAXoECAEQAw&cshid=1668917951732625&biw=1366&bih=693&dpr=1`,
+                                    }
+                                );
+                                crawl = await axios.get("http://localhost:5000/scraping")
+                            } while (crawl.data === "" || crawl.data === undefined);
                             // setResult((prevResult) => [
                             //     ...prevResult,
                             //     {
@@ -111,11 +126,11 @@ const AddImage = () => {
                             //     },
                             // ]);
 
-                            await forFunc(crawl.data, dataKalimat[l].kalimat.toLowerCase())
+                            //await forFunc(crawl.data, dataKalimat[l].kalimat.toLowerCase())
 
-                            console.log("Kata: ",k);
-                            console.log("Kalimat: ",n);
-                            console.log(dataKalimat[l].kalimat.toLowerCase())
+                            console.log("Kata: ",dataKata[j].kata);
+                            console.log("Kalimat: ",dataKalimat[l].kalimat);
+                            console.log(crawl.data)
                             n++;
                             if (n === 10) {
                                 break;
@@ -132,7 +147,7 @@ const AddImage = () => {
     };
 
     return (
-        <Layout>
+        <>
             <Box padding='20px'>
                 <Flex
                     flexDirection='column'
@@ -213,7 +228,7 @@ const AddImage = () => {
                     </Flex>
                 </Flex>
             </Box>
-        </Layout>
+        </>
     );
 };
 

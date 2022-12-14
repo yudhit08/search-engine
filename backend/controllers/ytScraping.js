@@ -19,7 +19,7 @@ export const ytScraping = async (req, res) => {
     }
 };
 
-export const getDataYtCrawling = (req, res) => {
+export const getDataYtScraping = (req, res) => {
     try {
         res.status(201).json(scraping);
         //scraping = ""

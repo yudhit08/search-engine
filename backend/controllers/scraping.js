@@ -55,19 +55,20 @@ export const scraping = async (req, res) => {
                         });
                         siteData = dataSite
                     }
-                    let data = { result: siteData };
-                    console.log(data)
-                    res.status(201).json(data);
                     done()
                 }
             },
         ]);
+        let data = { result: siteData };
+        console.log(data)
+        res.status(201).json(data);
+        siteData = ""
     } catch (error) {
         console.log(error.message);
     }
 };
 
-export const getDataCrawling = (req, res) => {
+export const getDataScraping = (req, res) => {
     try {
         res.status(201).json(siteData);
         siteData = ""

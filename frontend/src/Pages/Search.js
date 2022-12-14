@@ -39,14 +39,6 @@ const Search = () => {
         getWord(kata.data);
     };
 
-    useEffect(() => {
-        getSentence();
-    }, [selectedWord]);
-
-    useEffect(() => {
-        getInformasi();
-    }, [selectedSentence]);
-
     const getWord = (data) => {
         let j = 0;
         for (let i = 0; i < data.length; i++) {
@@ -66,6 +58,14 @@ const Search = () => {
             }
         }
     };
+
+    useEffect(() => {
+        getSentence();
+    }, [selectedWord]);
+
+    useEffect(() => {
+        getInformasi();
+    }, [selectedSentence]);
 
     const getSentence = async () => {
         setSentence([]);
@@ -196,13 +196,6 @@ const Search = () => {
                                 size='xl'
                                 onChange={(e) => setSelectedWord(e.value)}
                             />
-                            <Text
-                                fontSize='1rem'
-                                opacity='.5'
-                                fontStyle='italic'
-                            >
-                                Jumlah: {words.length} kata
-                            </Text>
                         </Box>
                         <Box width='50vw' borderRadius='10px' marginTop='20px'>
                             <Text>Kalimat</Text>
@@ -214,13 +207,6 @@ const Search = () => {
                                 size='xl'
                                 onChange={(e) => setSelectedSentence(e.value)}
                             />
-                            <Text
-                                fontSize='1rem'
-                                opacity='.5'
-                                fontStyle='italic'
-                            >
-                                Jumlah: {sentence.length} kalimat
-                            </Text>
                         </Box>
                         <Box width='50vw' borderRadius='10px' marginTop='20px'>
                             <Text>Informasi</Text>
@@ -232,7 +218,6 @@ const Search = () => {
                                 borderRadius='10px'
                                 align='left'
                                 justify='left'
-                                //flexDirection="column"
                             >
                                 {selectedSentence !== "" &&
                                     informasi.map((info) => {
@@ -243,13 +228,6 @@ const Search = () => {
                                         );
                                     })}
                             </Flex>
-                            <Text
-                                fontSize='1rem'
-                                opacity='.5'
-                                fontStyle='italic'
-                            >
-                                Jumlah: {informasi.length} informasi
-                            </Text>
                         </Box>
                     </Box>
 
@@ -265,7 +243,6 @@ const Search = () => {
                                         flexWrap='wrap'
                                         gap='10px'
                                         marginBottom='20px'
-                                        padding='10px'
                                     >
                                         {selectedSentence !== "" &&
                                             images.map((image) => {
@@ -273,7 +250,7 @@ const Search = () => {
                                                     <Image
                                                         key={image.id}
                                                         src={image.url}
-                                                        width='150px'
+                                                        width='170px'
                                                     />
                                                 );
                                             })}
@@ -283,7 +260,6 @@ const Search = () => {
                                     <Flex
                                         flexDirection='column'
                                         gap='10px'
-                                        padding='10px'
                                     >
                                         {selectedSentence !== "" &&
                                             videos.map((video, i) => {

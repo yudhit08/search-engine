@@ -75,14 +75,14 @@ const Scraping = () => {
         //setUrl(`https://id.wikipedia.org/wiki/${dataKata[j].kata.toLowerCase()}`)
 
                     
-                        await axios.post(`http://localhost:5000/scraping`, {
+                    await axios.post(`http://localhost:5000/scraping`, {
                             url : `${encodeURI(url)}`,
                         });
 
-                        crawl = await axios.get("http://localhost:5000/scraping");
+                       crawl = await axios.get("http://localhost:5000/scraping");
                     
-
-                    setResult(crawl.data);
+                        console.log(crawl.data)
+                    //setResult(crawl);
                     //await addKalimat(crawl.data)
         // for (let i = 6; i < 26; i++) {
         //     let letter = (i + 10).toString(36);

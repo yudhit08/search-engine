@@ -4,14 +4,9 @@ import {
     Box,
     Text,
     Flex,
-    Button,
-    InputGroup,
-    InputLeftAddon,
-    Input,
-    InputLeftElement,
     Textarea,
 } from "@chakra-ui/react";
-import { AiFillEdit, AiFillDelete, AiFillPlusCircle } from "react-icons/ai";
+import { AiFillEdit, AiFillDelete } from "react-icons/ai";
 import Swal from "sweetalert2";
 import Layout from "../Layout/Layout";
 
@@ -73,13 +68,6 @@ const AddData = () => {
                     break;
                 }
             }
-            // if (kalimat.includes(selectedWord)) {
-            //     setSentence((prevSentence) => [...prevSentence, kalimat]);
-            //     j++;
-            //     if (j === 10) {
-            //         break;
-            //     }
-            // }
         }
     };
 
